@@ -1,0 +1,3 @@
+# ShakeGuard
+
+Initializing repository...
