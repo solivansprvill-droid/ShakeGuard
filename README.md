@@ -5,9 +5,25 @@
 ## 下载
 
 - **APK（推荐）**：[ShakeGuard-v1.0.0-debug.apk](https://github.com/solivansprvill-droid/ShakeGuard/releases/latest/download/ShakeGuard-v1.0.0-debug.apk)
-  —— 由 GitHub Actions 自动构建（见 `.github/workflows/android.yml`），debug 签名包，需 Android 7.0+
+  —— 786 KB，debug 签名包，可直接安装，需 Android 7.0+
 - **官网**：https://shakeguard-lp.app.workbuddy.host/
-- **自己编译**：克隆仓库用 Android Studio 打开，`Build → Build APK(s)`（零第三方依赖）
+- **GitHub Pages**：https://solivansprvill-droid.github.io/ShakeGuard/
+- **自己编译**：见下方「本地构建」
+
+## 本地构建
+
+需要 JDK 17、Gradle 8.7+、Android SDK (platform-34 / build-tools 34.0.0)：
+
+```bash
+export JAVA_HOME=/path/to/jdk-17
+export ANDROID_HOME=/path/to/android-sdk
+gradle assembleDebug          # 产物：app/build/outputs/apk/debug/app-debug.apk
+```
+
+或用 Android Studio 打开项目，`Build → Build APK(s)`。项目零第三方依赖，构建不需要额外配置。
+
+> 仓库里保留了 `.github/workflows/android.yml`，用于在 GitHub Actions 上自动编译并发布 Release。
+> 注意：通过 API 推送 workflow 文件需要 token 具备 **workflow** 权限；用仓库网页上传该文件不受此限制。
 
 ## 背景
 
