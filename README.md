@@ -2,6 +2,13 @@
 
 安卓版「Restrict Motion Data」—— 关掉传感器，让「摇一摇跳广告」彻底失效。
 
+## 下载
+
+- **APK（推荐）**：[ShakeGuard-v1.0.0-debug.apk](https://github.com/solivansprvill-droid/ShakeGuard/releases/latest/download/ShakeGuard-v1.0.0-debug.apk)
+  —— 由 GitHub Actions 自动构建（见 `.github/workflows/android.yml`），debug 签名包，需 Android 7.0+
+- **官网**：https://shakeguard-lp.app.workbuddy.host/
+- **自己编译**：克隆仓库用 Android Studio 打开，`Build → Build APK(s)`（零第三方依赖）
+
 ## 背景
 
 iOS 27.2 Beta 2 新增了 **Restrict Motion Data** 开关：在 App Store 登录国区账号后，
@@ -21,7 +28,8 @@ iOS 27.2 Beta 2 新增了 **Restrict Motion Data** 开关：在 App Store 登录
 
 ## 使用
 
-1. 用 Android Studio 打开项目，`Build → Build APK(s)` 生成 `app-debug.apk` 并安装；
+1. 从 [Releases](https://github.com/solivansprvill-droid/ShakeGuard/releases) 下载 APK 安装；
+   或自行构建：用 Android Studio 打开项目，`Build → Build APK(s)` 生成 `app-debug.apk`；
 2. 手机连电脑（开启 USB 调试），执行一次授权命令（之后永久生效）：
 
    ```

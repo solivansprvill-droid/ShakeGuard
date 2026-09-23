@@ -2,12 +2,14 @@ package com.victory.shakeguard
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,9 +17,9 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
 import android.view.Gravity
-import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -150,7 +152,7 @@ class MainActivity : Activity() {
         }
         root.addView(explain)
 
-        setContentView(android.widget.ScrollView(this).apply { addView(root) })
+        setContentView(ScrollView(this).apply { addView(root) })
         refreshStatus()
     }
 
@@ -236,7 +238,7 @@ class MainActivity : Activity() {
 
     private fun vibrateTick() {
         val v = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator ?: return
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             v.vibrate(VibrationEffect.createOneShot(30, 80))
         }
     }

@@ -60,6 +60,8 @@
   .btn-ghost:hover{background:rgba(255,255,255,.16)}
   .meta{margin-top:26px;display:flex;flex-wrap:wrap;gap:20px;font-size:13.5px;color:#8A90B4}
   .meta b{color:#E9EBFF;font-weight:600}
+  .apk-note{margin-top:18px;font-size:12.5px;color:#8A90B4;display:flex;gap:9px;align-items:flex-start;max-width:520px}
+  .apk-note .ok{color:var(--mint);font-weight:800}
 
   /* phone mock */
   .phone-scene{display:flex;justify-content:center}
@@ -157,7 +159,7 @@
       <a href="#features">功能</a>
       <a href="#setup">上手</a>
       <a href="#faq">常见问题</a>
-      <a class="nav-cta" href="https://github.com/solivansprvill-droid/ShakeGuard" target="_blank" rel="noopener">GitHub 源码</a>
+      <a class="nav-cta" href="https://github.com/solivansprvill-droid/ShakeGuard/releases/latest/download/ShakeGuard-v1.0.0-debug.apk">⬇️ 下载 APK</a>
     </div>
   </div>
 </nav>
@@ -169,13 +171,16 @@
       <h1>把那一下「手抖」，<br>变成<span class="hl">彻底的静默</span>。</h1>
       <p class="lede">ShakeGuard 关掉系统的运动传感器，让拼多多、闲鱼们的「摇一摇跳转」拿不到任何加速度计数据 —— 摇断手也不会有反应。</p>
       <div class="btns">
-        <a class="btn btn-primary" href="#setup">⚡ 三步开始使用</a>
+        <a class="btn btn-primary" href="https://github.com/solivansprvill-droid/ShakeGuard/releases/latest/download/ShakeGuard-v1.0.0-debug.apk" id="dlTop">⬇️ 下载 APK（v1.0.0）</a>
         <a class="btn btn-ghost" href="https://github.com/solivansprvill-droid/ShakeGuard" target="_blank" rel="noopener">查看源码 →</a>
       </div>
       <div class="meta">
         <span><b>0</b> 第三方依赖</span>
         <span><b>1</b> 条 adb 命令授权</span>
         <span><b>100%</b> 本地运行，不联网</span>
+      </div>
+      <div class="apk-note">
+        <span class="ok">✓</span> APK 由 GitHub Actions 云端构建，构建日志公开可查 · 需 Android 7.0+ · debug 签名包
       </div>
     </div>
     <div class="phone-scene">
@@ -305,8 +310,13 @@
       <div class="step">
         <div class="n"></div>
         <div>
-          <h3>构建并安装 APK</h3>
-          <p>克隆仓库，用 Android Studio 打开（<span class="mono">Build → Build APK(s)</span>），把 <span class="mono">app-debug.apk</span> 装到手机上。</p>
+          <h3>下载安装 APK</h3>
+          <p>直接下载构建好的安装包（<span class="mono">ShakeGuard-v1.0.0-debug.apk</span>，约 2 MB），手机允许「安装未知来源应用」后装上即可。</p>
+          <div class="btns" style="margin-top:16px;gap:10px">
+            <a class="btn btn-primary" style="padding:11px 20px;font-size:14px" href="https://github.com/solivansprvill-droid/ShakeGuard/releases/latest/download/ShakeGuard-v1.0.0-debug.apk">⬇️ 下载 APK</a>
+            <a class="btn" style="padding:11px 20px;font-size:14px;background:var(--bg-soft);border-color:var(--line);color:var(--ink-2)" href="https://github.com/solivansprvill-droid/ShakeGuard/releases" target="_blank" rel="noopener">查看所有版本</a>
+          </div>
+          <p style="margin-top:12px;font-size:13px">想自己编译？克隆仓库用 Android Studio 打开，<span class="mono">Build → Build APK(s)</span> 即可。</p>
         </div>
       </div>
       <div class="step">
@@ -353,6 +363,10 @@
         <p>安卓出于安全考虑不允许普通 App 修改系统设置（否则任何 App 都能改你的系统状态）。这条命令相当于你亲手把这项能力交给它。授权一次后永久有效，手机重启、换 WiFi 都不需要重做。</p>
       </details>
       <details>
+        <summary>这个 APK 是哪里来的？安全吗？</summary>
+        <p>安装包由本仓库的 <b>GitHub Actions 云端构建</b>（工作流文件 <span class="mono">.github/workflows/android.yml</span>）自动产出，每次代码推送都会重新编译，构建日志和产物都可公开查看、可复现。它是 <b>debug 签名包</b>，由 Android 官方 Gradle 插件生成，没有经过任何第三方手改。你也可以克隆源码自行编译比对。</p>
+      </details>
+      <details>
         <summary>会有「传感器关闭」的提示吗？</summary>
         <p>部分机型状态栏会出现传感器停用的指示。如果你在意，可以用定时恢复让它自动消失。</p>
       </details>
@@ -368,8 +382,9 @@
         <p style="margin-top:14px;max-width:380px">安卓端的摇一摇广告静默工具。开源、免费、没有后台。</p>
       </div>
       <div class="f-links">
+        <a href="https://github.com/solivansprvill-droid/ShakeGuard/releases/latest/download/ShakeGuard-v1.0.0-debug.apk">下载 APK</a>
         <a href="https://github.com/solivansprvill-droid/ShakeGuard" target="_blank" rel="noopener">源码仓库</a>
-        <a href="#setup">构建指南</a>
+        <a href="#setup">安装指南</a>
         <a href="#faq">常见问题</a>
         <a href="https://github.com/solivansprvill-droid/ShakeGuard/issues" target="_blank" rel="noopener">问题反馈</a>
       </div>
