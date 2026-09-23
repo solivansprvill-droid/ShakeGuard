@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShakeGuard 摇一摇克星 · 让「摇一摇跳广告」彻底失效</title>
+<meta name="description" content="ShakeGuard 是安卓端的摇一摇广告拦截工具：一键关闭系统传感器，让拼多多、闲鱼等 App 的「摇一摇跳转」拿不到加速度计数据，直接失效。开源、免费、无广告。">
+<style>
+  :root{
+    --ink:#12142A;
+    --ink-2:#3A3F5C;
+    --ink-3:#6B7194;
+    --line:#E6E8F2;
+    --bg:#FFFFFF;
+    --bg-soft:#F7F8FC;
+    --brand:#FF4D3D;
+    --brand-2:#FF8A3D;
+    --brand-soft:#FFF1EE;
+    --mint:#12B886;
+    --mint-soft:#E8FAF3;
+    --navy:#0E1026;
+    --radius:18px;
+    --shadow:0 10px 40px -12px rgba(18,20,42,.18);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{width:100%;max-width:1120px;margin:0 auto;padding:0 24px}
+  .mono{font-family:var(--mono)}
+
+  /* ---------- nav ---------- */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:saturate(180%) blur(14px);background:rgba(255,255,255,.82);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px}
+  .logo .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:grid;place-items:center;color:#fff;font-size:15px;box-shadow:0 6px 16px -6px rgba(255,77,61,.7)}
+  .nav-links{display:flex;align-items:center;gap:26px;font-size:14.5px;color:var(--ink-2)}
+  .nav-links a:hover{color:var(--brand)}
+  .nav-cta{padding:9px 16px;border-radius:11px;background:var(--ink);color:#fff!important;font-weight:600;font-size:14px}
+  @media(max-width:820px){.nav-links a:not(.nav-cta){display:none}}
+
+  /* ---------- hero ---------- */
+  header{position:relative;overflow:hidden;background:
+    radial-gradient(1000px 520px at 82% -8%,rgba(255,77,61,.20),transparent 60%),
+    radial-gradient(760px 420px at 8% 8%,rgba(18,184,134,.14),transparent 62%),
+    linear-gradient(180deg,#0E1026,#191C3C 68%,#22264A)}
+  .hero{display:grid;grid-template-columns:1.08fr .92fr;gap:56px;align-items:center;padding:86px 0 96px}
+  .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);color:#E9EBFF;font-size:13px;margin-bottom:26px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px rgba(18,184,134,.22)}
+  h1{font-size:clamp(34px,5.2vw,58px);line-height:1.12;letter-spacing:-.035em;color:#fff;font-weight:800}
+  h1 .hl{background:linear-gradient(100deg,var(--brand),var(--brand-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{margin-top:22px;font-size:17px;color:#B9BEDC;max-width:540px}
+  .btns{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:14px 24px;border-radius:13px;font-weight:700;font-size:15px;transition:transform .16s ease,box-shadow .16s ease,background .16s ease;border:1px solid transparent}
+  .btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;box-shadow:0 14px 34px -12px rgba(255,77,61,.8)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 20px 40px -14px rgba(255,77,61,.9)}
+  .btn-ghost{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);color:#fff}
+  .btn-ghost:hover{background:rgba(255,255,255,.16)}
+  .meta{margin-top:26px;display:flex;flex-wrap:wrap;gap:20px;font-size:13.5px;color:#8A90B4}
+  .meta b{color:#E9EBFF;font-weight:600}
+
+  /* phone mock */
+  .phone-scene{display:flex;justify-content:center}
+  .phone{width:288px;border-radius:42px;padding:11px;background:linear-gradient(160deg,#3A3F66,#191C3A);box-shadow:0 40px 80px -30px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.06)}
+  .screen{background:#F3F4FA;border-radius:33px;height:520px;padding:18px 16px;display:flex;flex-direction:column;gap:14px;overflow:hidden;position:relative}
+  .notch{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:74px;height:7px;border-radius:99px;background:rgba(0,0,0,.22)}
+  .s-status{display:flex;justify-content:space-between;font-size:10.5px;color:#8A90B4;padding:2px 4px 0}
+  .s-title{font-size:13px;font-weight:700;color:var(--ink)}
+  .s-sub{font-size:11px;color:var(--ink-3);margin-top:2px}
+  .switch-card{background:#fff;border-radius:15px;padding:13px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 14px -8px rgba(18,20,42,.3)}
+  .switch-card .lab{font-size:12.5px;font-weight:600}
+  .switch-card .st{font-size:10.5px;margin-top:2px;color:var(--ink-3)}
+  .tgl{width:46px;height:27px;border-radius:99px;background:#D7DAE8;position:relative;cursor:pointer;transition:background .25s ease;flex:0 0 auto}
+  .tgl::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.22);transition:transform .25s cubic-bezier(.4,1.4,.5,1)}
+  .tgl.on{background:var(--mint)}
+  .tgl.on::after{transform:translateX(19px)}
+  .ad-card{margin-top:auto;background:linear-gradient(135deg,#FFE9E4,#FFF4EE);border:1px solid #FFD9D1;border-radius:15px;padding:14px;text-align:center;position:relative;overflow:hidden}
+  .ad-card .ad-h{font-size:12.5px;font-weight:700;color:#C2372A}
+  .ad-card .ad-t{font-size:10.5px;color:#9C6A60;margin-top:3px}
+  .ad-icon{font-size:26px;display:block;margin-bottom:5px}
+  .shake{animation:shake .5s ease infinite}
+  @keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-11deg)}75%{transform:rotate(11deg)}}
+  .blocked{position:absolute;inset:0;background:rgba(232,250,243,.96);display:grid;place-items:center;text-align:center;padding:12px;opacity:0;transition:opacity .3s ease}
+  .blocked.show{opacity:1}
+  .blocked .b-ico{font-size:26px}
+  .blocked .b-t{font-size:12px;font-weight:800;color:#0B7A5B;margin-top:5px}
+  .blocked .b-s{font-size:10px;color:#4E8E77;margin-top:2px}
+  .hint{text-align:center;font-size:11.5px;color:#8A90B4;margin-top:14px}
+
+  /* ---------- sections ---------- */
+  section{padding:92px 0}
+  .soft{background:var(--bg-soft)}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brand);margin-bottom:12px}
+  h2{font-size:clamp(25px,3.3vw,36px);letter-spacing:-.03em;line-height:1.25;font-weight:800}
+  .sub{margin-top:14px;color:var(--ink-3);font-size:16px;max-width:680px}
+  .grid{display:grid;gap:20px;margin-top:46px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:900px){.g3,.g4{grid-template-columns:repeat(2,1fr)}.hero{grid-template-columns:1fr;gap:48px;padding:64px 0 72px}}
+  @media(max-width:620px){.g3,.g4,.g2{grid-template-columns:1fr}}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+  .card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#D9DDF0}
+  .card .ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:19px;background:var(--brand-soft);margin-bottom:16px}
+  .card h3{font-size:16.5px;font-weight:700;letter-spacing:-.01em}
+  .card p{margin-top:9px;font-size:14.5px;color:var(--ink-3)}
+
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:46px}
+  @media(max-width:820px){.cmp{grid-template-columns:1fr}}
+  .cmp-col{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px}
+  .cmp-col.ios{border-top:3px solid #8A90B4}
+  .cmp-col.and{border-top:3px solid var(--brand)}
+  .cmp-col h3{font-size:15px;display:flex;align-items:center;gap:9px}
+  .tag{font-size:11px;padding:3px 9px;border-radius:99px;background:var(--bg-soft);color:var(--ink-3);font-weight:600;border:1px solid var(--line)}
+  .cmp-col.and .tag{background:var(--brand-soft);color:#C2372A;border-color:#FFD9D1}
+  .cmp-col p{font-size:14.5px;color:var(--ink-2);margin-top:14px}
+  .cmp-col p b{color:var(--ink)}
+  .steps{counter-reset:s;margin-top:46px;display:grid;gap:16px}
+  .step{display:flex;gap:20px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+  .step .n{counter-increment:s;flex:0 0 36px;height:36px;border-radius:11px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800;font-size:15px}
+  .step .n::before{content:counter(s)}
+  .step h3{font-size:16px;font-weight:700}
+  .step p{font-size:14.5px;color:var(--ink-3);margin-top:7px}
+  .code{margin-top:15px;display:flex;align-items:center;gap:12px;background:#0E1026;border-radius:12px;padding:13px 15px;flex-wrap:wrap}
+  .code code{font-family:var(--mono);font-size:12.5px;color:#8FE3C4;word-break:break-all;flex:1;min-width:220px}
+  .copy{background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font)}
+  .copy:hover{background:rgba(255,255,255,.22)}
+  details{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin-top:12px}
+  details summary{cursor:pointer;font-weight:650;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+";color:var(--ink-3);font-size:19px;font-weight:400}
+  details[open] summary::after{content:"–"}
+  details p{margin-top:12px;font-size:14.5px;color:var(--ink-3)}
+  .notice{display:flex;gap:14px;background:#FFF8EC;border:1px solid #FFE6BF;border-radius:14px;padding:18px 20px;margin-top:34px;font-size:14px;color:#8A6212}
+  .notice b{color:#6B4A0B}
+
+  footer{background:var(--navy);color:#8A90B4;padding:52px 0 40px;font-size:14px}
+  .f-in{display:flex;justify-content:space-between;gap:28px;flex-wrap:wrap;align-items:flex-start}
+  footer .logo{color:#fff}
+  footer a:hover{color:#fff}
+  .f-links{display:flex;gap:22px;flex-wrap:wrap}
+  .f-bottom{margin-top:34px;padding-top:22px;border-top:1px solid rgba(255,255,255,.10);font-size:12.5px;color:#6C7398}
+  .toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,18px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.26s ease;z-index:99}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-in">
+    <a class="logo" href="#top"><span class="mark">🛡</span> ShakeGuard</a>
+    <div class="nav-links">
+      <a href="#problem">为什么需要</a>
+      <a href="#how">工作原理</a>
+      <a href="#features">功能</a>
+      <a href="#setup">上手</a>
+      <a href="#faq">常见问题</a>
+      <a class="nav-cta" href="https://github.com/solivansprvill-droid/ShakeGuard" target="_blank" rel="noopener">GitHub 源码</a>
+    </div>
+  </div>
+</nav>
+
+<header id="top">
+  <div class="wrap hero">
+    <div>
+      <span class="badge"><span class="dot"></span> Android 7.0+ · 免费开源 · 无广告无后台</span>
+      <h1>把那一下「手抖」，<br>变成<span class="hl">彻底的静默</span>。</h1>
+      <p class="lede">ShakeGuard 关掉系统的运动传感器，让拼多多、闲鱼们的「摇一摇跳转」拿不到任何加速度计数据 —— 摇断手也不会有反应。</p>
+      <div class="btns">
+        <a class="btn btn-primary" href="#setup">⚡ 三步开始使用</a>
+        <a class="btn btn-ghost" href="https://github.com/solivansprvill-droid/ShakeGuard" target="_blank" rel="noopener">查看源码 →</a>
+      </div>
+      <div class="meta">
+        <span><b>0</b> 第三方依赖</span>
+        <span><b>1</b> 条 adb 命令授权</span>
+        <span><b>100%</b> 本地运行，不联网</span>
+      </div>
+    </div>
+    <div class="phone-scene">
+      <div>
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="s-status"><span>17:40</span><span>◍ ▮▮ 86%</span></div>
+            <div>
+              <div class="s-title">传感器开关</div>
+              <div class="s-sub" id="mockStatus">传感器正常 · App 可以摇</div>
+            </div>
+            <div class="switch-card">
+              <div>
+                <div class="lab">关闭运动传感器</div>
+                <div class="st">加速度计 / 陀螺仪</div>
+              </div>
+              <div class="tgl" id="mockTgl" role="switch" aria-label="演示开关"></div>
+            </div>
+            <div class="ad-card" id="adCard">
+              <span class="ad-icon shake" id="adIcon">🫨</span>
+              <div class="ad-h">摇一摇 · 跳转第三方页面</div>
+              <div class="ad-t">检测到设备晃动，正在打开…</div>
+              <div class="blocked" id="blocked">
+                <div>
+                  <div class="b-ico">🛡️</div>
+                  <div class="b-t">传感器已关闭</div>
+                  <div class="b-s">未检测到任何运动数据<br>跳转被成功拦截</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hint">👆 点一下开关，看看广告会发生什么</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="problem">
+  <div class="wrap">
+    <div class="kicker">The Problem</div>
+    <h2>你不是不小心，是被精心设计了</h2>
+    <p class="sub">「摇一摇」本质是一个把手机晃动映射成点击的传感器监听。它的转化率高得离谱，因为用户几乎是无法避免地会晃到手机。</p>
+    <div class="grid g3">
+      <div class="card">
+        <div class="ico">📳</div>
+        <h3>走路、上车都会触发</h3>
+        <p>只要有连续晃动，加速度阈值就会被突破。你不是在「摇」，你只是在移动。</p>
+      </div>
+      <div class="card">
+        <div class="ico">🎯</div>
+        <h3>放在加载完成的瞬间</h3>
+        <p>页面刚打开、手指还没落稳时最容易晃动，这时弹跳转的成功率最高。</p>
+      </div>
+      <div class="card">
+        <div class="ico">🚪</div>
+        <h3>退出成本被拉高</h3>
+        <p>跳转后返回键常常无法一键回到原页面，多看一个广告就是多一份曝光收益。</p>
+      </div>
+    </div>
+    <div class="notice">
+      <span>⚖️</span>
+      <div>工信部已多次针对「摇一摇」乱跳转开展整治，要求触发阈值不得过低、必须提供明显关闭方式。<b>但只要技术入口还在，主动权就依然在 App 手里。</b>ShakeGuard 的思路是：不去争论阈值，直接把传感器关掉。</div>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="soft">
+  <div class="wrap">
+    <div class="kicker">How it works</div>
+    <h2>iOS 与 Android，两条不同的路</h2>
+    <p class="sub">iOS 27.2 把这件事做成了系统级隐私开关；安卓不能照抄，但有一个等效的系统入口。</p>
+    <div class="cmp">
+      <div class="cmp-col ios">
+        <h3>🍎 iOS 27.2 <span class="tag">Restrict Motion Data</span></h3>
+        <p>iOS 把加速度计、陀螺仪封装在 <b>CoreMotion</b> 框架后面，App 想读取运动数据必须通过「运动与健身」隐私授权。</p>
+        <p>新版系统在 <b>设置 → 隐私与安全性</b> 提供了按 App 的限制开关：被限制的 App 调用 <span class="mono">startAccelerometerUpdates()</span> 时收不到任何回调，摇一摇检测直接失效。</p>
+        <p>👉 优点：<b>粒度精确到单个 App</b>，其他 App 不受影响。</p>
+      </div>
+      <div class="cmp-col and">
+        <h3>🤖 Android <span class="tag">ShakeGuard 方案</span></h3>
+        <p>安卓读取加速度计<b>不需要任何运行时权限</b>，所以系统层面没有「按 App 拒绝」这种机制（除非 root 后挂 Xposed 模块）。</p>
+        <p>但系统内置了一个开发者级总开关 <span class="mono">Settings.Secure「sensors_off」</span>：置 1 之后全机传感器静默，<b>所有 App 都拿不到运动数据</b>。</p>
+        <p>👉 取舍：<b>力度更狠，但影响全机</b> —— 自动横屏、计步、指南针会同时失效，所以我们做了定时自动恢复和一键磁贴，用完就开回来。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="kicker">Features</div>
+    <h2>够用的四个能力</h2>
+    <p class="sub">没有花哨功能，只解决一个问题，并且把「副作用」控制到最小。</p>
+    <div class="grid g4">
+      <div class="card">
+        <div class="ico">🔘</div>
+        <h3>一键总开关</h3>
+        <p>App 内一个大开关，实时显示当前传感器状态，所见即所得。</p>
+      </div>
+      <div class="card">
+        <div class="ico">⬇️</div>
+        <h3>下拉磁贴</h3>
+        <p>加到通知栏快捷面板。开 App 前一秒关、退出后一秒开，比进设置快得多。</p>
+      </div>
+      <div class="card">
+        <div class="ico">⏱</div>
+        <h3>定时自动恢复</h3>
+        <p>1 / 5 / 10 分钟后自动开回传感器，防止忘开导航、计步和屏幕旋转。</p>
+      </div>
+      <div class="card">
+        <div class="ico">🧊</div>
+        <h3>零依赖 · 不联网</h3>
+        <p>纯 Android SDK 编写，无第三方库、无网络权限、无数据采集。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="setup" class="soft">
+  <div class="wrap">
+    <div class="kicker">Get started</div>
+    <h2>三步开始使用</h2>
+    <p class="sub">唯一需要的「门槛」是首次用电脑授权一次系统设置写入权限 —— 之后永久生效，不用再连电脑。</p>
+    <div class="steps">
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h3>构建并安装 APK</h3>
+          <p>克隆仓库，用 Android Studio 打开（<span class="mono">Build → Build APK(s)</span>），把 <span class="mono">app-debug.apk</span> 装到手机上。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h3>执行一次授权命令</h3>
+          <p>手机开启 USB 调试并连电脑，执行下面这条命令（App 内也有一键复制按钮）：</p>
+          <div class="code">
+            <code id="adbCmd">adb shell pm grant com.victory.shakeguard android.permission.WRITE_SECURE_SETTINGS</code>
+            <button class="copy" data-copy="adbCmd">复制</button>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h3>把它放到快捷面板</h3>
+          <p>下拉通知栏 → 编辑磁贴 → 把「传感器开关」拖上去。之后每次打开购物 App 前点一下，退出后点回来。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="kicker">FAQ</div>
+    <h2>常见问题</h2>
+    <div style="margin-top:34px">
+      <details open>
+        <summary>能像 iOS 那样只屏蔽某个 App 吗？</summary>
+        <p>不能。安卓的 <span class="mono">sensors_off</span> 是全局开关，无法按 App 精确屏蔽 —— 那需要 root 后安装 Xposed / LSPosed 模块，成本和风险都高得多。ShakeGuard 选择的是「一键全局 + 定时自动恢复」这个工程折中。</p>
+      </details>
+      <details>
+        <summary>关闭传感器有什么副作用？</summary>
+        <p>自动旋转屏幕、计步、抬手亮屏、指南针、部分导航的转向判断会暂时失效（GPS 定位本身不受影响）。这也是我们做「定时自动恢复」的原因：设好 5 分钟，忘了也不会一直关着。</p>
+      </details>
+      <details>
+        <summary>需要 root 吗？会收集我的数据吗？</summary>
+        <p>不需要 root。授权用的是 Android 官方的 <span class="mono">WRITE_SECURE_SETTINGS</span> 权限，由你自己通过 adb 授予。App 没有申请网络权限，不联网、不上传任何数据。</p>
+      </details>
+      <details>
+        <summary>为什么还要用电脑执行 adb 命令？</summary>
+        <p>安卓出于安全考虑不允许普通 App 修改系统设置（否则任何 App 都能改你的系统状态）。这条命令相当于你亲手把这项能力交给它。授权一次后永久有效，手机重启、换 WiFi 都不需要重做。</p>
+      </details>
+      <details>
+        <summary>会有「传感器关闭」的提示吗？</summary>
+        <p>部分机型状态栏会出现传感器停用的指示。如果你在意，可以用定时恢复让它自动消失。</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="f-in">
+      <div>
+        <a class="logo" href="#top"><span class="mark">🛡</span> ShakeGuard</a>
+        <p style="margin-top:14px;max-width:380px">安卓端的摇一摇广告静默工具。开源、免费、没有后台。</p>
+      </div>
+      <div class="f-links">
+        <a href="https://github.com/solivansprvill-droid/ShakeGuard" target="_blank" rel="noopener">源码仓库</a>
+        <a href="#setup">构建指南</a>
+        <a href="#faq">常见问题</a>
+        <a href="https://github.com/solivansprvill-droid/ShakeGuard/issues" target="_blank" rel="noopener">问题反馈</a>
+      </div>
+    </div>
+    <div class="f-bottom">
+      仅供个人设备使用。本工具通过关闭系统传感器工作，请自行评估对你日常使用的影响。iOS 27.2 的 Restrict Motion Data 为 Apple 系统功能，与本项目无关。
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">已复制</div>
+
+<script>
+  // 交互演示：开关 → 广告被拦截
+  var tgl = document.getElementById('mockTgl');
+  var blocked = document.getElementById('blocked');
+  var adIcon = document.getElementById('adIcon');
+  var mockStatus = document.getElementById('mockStatus');
+  tgl.addEventListener('click', function () {
+    var on = tgl.classList.toggle('on');
+    blocked.classList.toggle('show', on);
+    adIcon.classList.toggle('shake', !on);
+    mockStatus.textContent = on ? '传感器已关闭 · 摇一摇失效' : '传感器正常 · App 可以摇';
+    toast(on ? '传感器已关闭，摇一摇被拦截' : '传感器已恢复');
+  });
+
+  // 复制按钮
+  function toast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg || '已复制';
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 1800);
+  }
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = document.getElementById(btn.getAttribute('data-copy')).textContent.trim();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){ toast('adb 命令已复制'); }, function(){ fallback(text); });
+      } else { fallback(text); }
+    });
+  });
+  function fallback(text){
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('adb 命令已复制'); } catch(e) { toast('复制失败，请手动选择'); }
+    document.body.removeChild(ta);
+  }
+</script>
+</body>
+</html>
