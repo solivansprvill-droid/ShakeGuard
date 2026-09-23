@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">摇一摇克星 ShakeGuard</string>
+    <string name="tile_label">传感器开关</string>
+</resources>
